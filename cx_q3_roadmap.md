@@ -84,7 +84,7 @@
 | % calls made by AI | 10% | 20% | — | ~4.5% | **-5.5pp** |
 | % messages to internal team by AI | 30% | 60% | 0% | 0% | **-30pp** |
 
-- **AI messages to customer**: Best-performing automation metric — improving (10.3% → 15.6%) but needs to nearly double by August.
+- **AI messages to customer**: Best-performing automation metric — improving (10.3% → 15.6%) but needs to nearly double by August. The **warranty relay experiment** is projected to add ~305 AI messages/day (+9,150/month), lifting this to an estimated **39.3%** — surpassing the Aug target of 25% and approaching the Dec target of 50%. _(Basis: May actuals = 3,657 AI messages on a base of ~23,442 total messages/month; +305/day added to both numerator and denominator, assuming 30-day month.)_
 - **Auto task creation**: Near zero. At 2.4% vs 20% target — needs urgent focus.
 - **AI calls**: Pre-delivery bot is the only live piece (~4% feedback + 0.5%). Long way from 10%.
 - **Internal team AI messages**: Nothing live. 0% → 30% by August is an extremely steep ask.
@@ -104,7 +104,7 @@
 | Goal | Status |
 |---|---|
 | Ticket deflection | 🔴 Behind — volume rising |
-| AI customer messages | 🟡 Improving but slow |
+| AI customer messages | 🟡 Improving but slow — warranty relay projected to push to 39.3% (vs 25% Aug target) |
 | Auto task creation | 🔴 Critical gap |
 | AI calls | 🟡 Early, pre-delivery bot only |
 | AI internal messages | 🔴 Nothing live |
@@ -112,6 +112,92 @@
 | Customer message response time | 🔴 Worsening |
 
 **Bottom line:** 6 out of 7 goals are behind, and 2 are actively regressing. August targets are ~10 weeks away — deflection and response time need the most urgent attention.
+
+---
+
+## Warranty FCR — Human Agent Analysis (May 2026 onwards)
+
+> ⚠️ **Not picked for Q3 roadmap** — impact assessed as low relative to other priorities. Documented here for reference.
+
+**Scope:** Warranty tickets resolved by a human agent (bot IDs excluded, full list of 10 applied) since May 1 2026. Total: 2,085 tickets.
+
+### By Customer Complaint
+
+| Complaint Category | Share |
+|---|---:|
+| Gear / Clutch | 13.0% |
+| Engine / Powertrain | 11.1% |
+| Suspension / Noise / Brakes | 10.3% |
+| Mileage | 7.4% |
+
+- **Mileage complaints (7.4%)** are a structural mis-expectation problem tied to ARAI vs real-world figures — not a genuine warranty issue.
+- **Gear/Clutch tickets** frequently involved customers who had attempted a self-repair before raising the issue, or were paused pending customer action.
+- In several cases the customer raised the wrong issue category — the actual fault was not covered under warranty, making the FCR a denial rather than a resolution.
+
+### By Agent Action
+
+| Agent Action | Tickets | Share |
+|---|---:|---:|
+| Workshop visit scheduled | 595 | 28.5% |
+| Warranty denied | 505 | 24.2% |
+| On hold — pending customer action | 341 | 16.4% |
+| General warranty terms explained | 222 | 10.6% |
+| Unreachable customer | 94 | 4.5% |
+| Genuinely resolved on call | 52 | 2.5% |
+
+- **Workshop scheduling (28.5%):** Agents shared workshop address, booked drop-off slots, or arranged pickup for non-drivable cars. Recurring friction: Spinny's limited workshop network forces customers in some cities to OEM brand service centres.
+- **Denial (24.2%):** Agents cited specific exclusions — clutch disc, battery, tyres, AC compressor, electrical items — or informed customers their warranty had expired. A subset of these were raised within 30 days of delivery (customers hitting an exclusion very early in ownership).
+- **On hold (16.4%):** Waiting on repair estimates, invoices, or proof of purchase before the claim could proceed.
+- **Terms explained (10.6%):** No active repair rejected — customer had a coverage question only.
+- **Unreachable (4.5%):** Closed after 3+ unanswered call attempts.
+- **Truly resolved (2.5%):** DIY fix guided by agent, or a misunderstanding cleared up.
+
+### Key Findings on Denials
+
+- **237 tickets** had an explicit agent-stated denial confirmed from call summaries (floor estimate; holistic reading puts the true count at ~505).
+- **16 of 237 (6.7%)** were raised within 30 days of car delivery — the highest-risk window for customer dissatisfaction escalation.
+- A separate cut looked at tickets where the customer used the "Other concern with…" or "My issue is not listed here" complaint path and still received a denial:
+
+| Month | Tickets |
+|---|---:|
+| April 2026 | 89 |
+| May 2026 | 106 |
+| June 2026 (partial) | 56 |
+
+May-over-April increase suggests this pattern is growing. June is on pace to exceed May on a full-month basis.
+
+---
+
+## Smart Message Prioritiser — NDOA Update Analysis (15–21 Jun 2026)
+
+> ⚠️ **Not picked for Q3 roadmap** — only ~192 messages/week (2.2%) would benefit from suppressing the NDOA update. Volume too low to justify the investment.
+
+**Scope:** 8,723 "do not prioritise" messages over 7 days (15–21 Jun 2026).
+
+| Segment | Count | Share |
+|---|---:|---:|
+| NDOA should be updated | ~8,531 | 97.8% |
+| NDOA should NOT be updated (pure acks: "ok", "thanks", "N/A", emojis) | ~192 | 2.2% |
+
+**Current behaviour of updating NDOA for all do-not-prioritise messages is correct in almost every case.**
+
+### Breakdown — Messages Requiring NDOA Update (Pareto)
+
+| Category | Share | Cumulative |
+|---|---:|---:|
+| Status check / follow-up | 30% | 30% |
+| Request / ask | 20% | 50% |
+| Document / info sharing | 16% | 66% |
+| Issue / complaint report | 10% | 76% |
+| Question | 8% | 84% |
+| Acknowledgment with embedded ask | 7% | 91% |
+| Other | 5% | 96% |
+| Escalation / frustration | 3% | 99% |
+| Scheduling | 2% | 100% |
+
+The top 4 buckets — status checks, requests, document sharing, and issue reports — cover **~76%** of all messages requiring NDOA updates.
+
+> ⚠️ **Watch list:** The ~3% escalation/frustration messages classified as "do not prioritise" may be misclassifications — worth a closer look.
 
 ---
 
