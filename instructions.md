@@ -33,6 +33,14 @@ For each candidate item, capture:
 4. **Current state** — is anything live today, what was tried in Q1/Q2
 5. **Dependencies** — external teams, APIs, third parties needed
 
+## Git & Push Protocol
+- **Remote**: https://github.com/devansh-agrawal97/cx_product_management
+- **On every push request**:
+  1. Run `git diff` to check all uncommitted and staged changes
+  2. Show a **merge summary** — list of files changed, lines added/removed, and a short description of each change
+  3. **Wait for explicit permission** before pushing
+  4. Only push after the user confirms
+
 ## What This Roadmap is NOT
 - Not a sprint plan or tech spec
 - Not acceptance criteria or user stories
