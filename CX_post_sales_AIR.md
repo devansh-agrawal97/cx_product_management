@@ -811,7 +811,111 @@ Key computed columns (confirmed):
 | `pendency_hours` | decimal | Hours ticket was pending |
 | `frt1` | bigint | First Response Time (minutes to first agent response) |
 | `num_tasks` / `num_messages` / `num_calls` | bigint | Engagement counts |
-| `connected_calls` | bigint | Connected call count |
+| `connected_calls` | bigint | ⚠️ **Misleading name** — see Call Measurement below |
+
+---
+
+### Call Measurement — `cx_tickets` vs `cx_communication_messages`
+
+> **Confirmed via ticket-level cross-validation, June 2026.**
+
+#### `cx_tickets` fields (pre-aggregated on ticket)
+- **`num_calls`** = count of `CALL_DETAILS` rows in `cx_communication_messages` for that ticket. Includes both inbound + outbound. Reliable for total call attempts.
+- **`connected_calls`** = ⚠️ **NOT connected phone calls.** This field counts total customer interactions/touchpoints (calls + messages + events), NOT connected phone calls. Evidence:
+  - 20.5% of Spinny Benefits tickets have `connected_calls > 0` but `num_calls = 0`
+  - 39.1% of Spinny Benefits tickets have `connected_calls > num_calls`
+  - 24.1% of Warranty tickets have `connected_calls > num_calls`
+  - **Do not use this field for call connect rate analysis.**
+
+#### `cx_communication_messages` — the correct source for call analysis
+Table: `sp_entity_store_intermediate.cx_communication_messages`
+
+Filter: `message_type = 'CALL_DETAILS'` and `meta_data IS NOT NULL AND meta_data != ''`
+
+##### Dual JSON Schema (CRITICAL)
+Two different JSON schemas exist in `meta_data` for CALL_DETAILS records. **Both must be handled** — using only one misses ~25% of call records.
+
+| | Schema A (~279K records) | Schema B (~75K records) |
+|---|---|---|
+| Call direction | `$.type` | `$.callback_data.callType` |
+| Call outcome | `$.status` | `$.callback_data.callResult` |
+| OB value | `outbound.manual.dial` | `outbound.manual.dial` |
+| Connected value | `CONNECTED` | `SUCCESS` |
+| IB value | `inbound.call.dial` | _(no IB records in Schema B)_ |
+| Failed values | `NO_ANSWER`, `BUSY`, etc. | `FAILURE` |
+
+~871 records match neither schema — excluded from all counts.
+
+**How to detect**: If `get_json_string(meta_data, '$.type')` returns a call direction value → Schema A. If `get_json_string(meta_data, '$.callback_data.callType')` returns a value → Schema B.
+
+Additional Schema A fields:
+- **`$.duration`** — call duration (e.g. `"00:02:29.895"`)
+- **`$.hangup_by`** — who ended call (`AgentHangup` / `UserHangup`)
+- **`$.status`** values: `CONNECTED`, `NO_ANSWER`, `BUSY`, `CALL_NOT_PICKED`, `CALL_HANGUP`, `CALL_DROP`, `FAILED`, `PROVIDER_FAILURE`, `ATTEMPT_FAILED`, `NUMBER_FAILURE`, `PROVIDER_TEMP_FAILURE`
+
+##### Correct OB call counting logic (dual-schema)
+```sql
+-- OB attempt (either schema):
+SUM(CASE
+  WHEN get_json_string(meta_data, '$.type') = 'outbound.manual.dial' THEN 1
+  WHEN get_json_string(meta_data, '$.callback_data.callType') = 'outbound.manual.dial' THEN 1
+  ELSE 0
+END) AS ob_attempts
+
+-- OB connected (either schema):
+SUM(CASE
+  WHEN get_json_string(meta_data, '$.type') = 'outbound.manual.dial'
+       AND get_json_string(meta_data, '$.status') = 'CONNECTED' THEN 1
+  WHEN get_json_string(meta_data, '$.callback_data.callType') = 'outbound.manual.dial'
+       AND get_json_string(meta_data, '$.callback_data.callResult') = 'SUCCESS' THEN 1
+  ELSE 0
+END) AS ob_connected
+```
+
+**Note on IB calls**: Inbound calls (`$.type = 'inbound.call.dial'`) almost never have `status = CONNECTED` in meta_data — they use a different status tracking mechanism. All IB rows can be treated as connected. However, for FCR and call distribution analysis, **only OB calls are counted** (IB excluded from attempts, connected, and distribution buckets).
+
+##### Ticket Status — Closed Definition
+A ticket is considered **closed** if either:
+- `is_closed = 1` — explicitly closed/resolved/dropped
+- `ever_merged_flag = 1` — merged into another ticket (treated as closed)
+
+Status combinations in `cx_tickets`:
+
+| is_closed | ever_merged_flag | is_dropped | pending_flag | Effective Status |
+|---:|---:|---:|---:|---|
+| 1 | 0 | 0 | 0 | Closed |
+| 0 | 1 | 0 | 0 | Merged (→ treat as closed) |
+| 1 | 0 | 1 | 0 | Dropped (closed) |
+| 0 | 0 | 0 | 1 | Pending (genuinely open) |
+
+April 2026: 98.6% of tickets are closed (including merged). Only 354 genuinely pending.
+
+##### FCR Definition
+**FCR (First Call Resolution)** = ticket has exactly 1 OB connected call AND is closed (is_closed=1 OR ever_merged_flag=1).
+
+```sql
+-- FCR%:
+ROUND(
+  SUM(CASE WHEN ob_connected = 1 AND (is_closed = 1 OR ever_merged_flag = 1) THEN 1 ELSE 0 END)
+  * 100.0 / COUNT(*),
+1) AS fcr_pct
+```
+
+Why this definition:
+- The DB `fcr_flag` field is based on internal CX rules, not call-based
+- Open tickets with 1 OB connected call should NOT count as FCR — the issue isn't resolved yet
+- Merged tickets should count — the issue was resolved via the parent ticket
+
+##### OB Connected Call Distribution (0/1/2/3/3+)
+Tickets are bucketed by their per-ticket OB connected call count. Within each bucket, closure% = % of tickets in that bucket that are closed (is_closed=1 OR ever_merged_flag=1).
+
+##### Benchmarks (April 2026, OB only)
+- **OB connect rate**: 69.9% (62K connected / 89K OB attempts)
+- **Avg OB per ticket**: 3.6 attempts, 2.5 connected
+- **Avg OB to close**: 3.4 attempts per closed ticket
+- **FCR**: 33.1% (1 OB connected & closed)
+- **0 OB conn tickets**: 22.5% (99.9% closed — mostly chat-resolved or merged)
+- **3+ OB conn tickets**: 19.2% (94.0% closed — chronic repeat-contact)
 | `AOH_creation` | text | After office hours flag at creation |
 | `car_category` | text | Car category |
 | `city` | text | City |

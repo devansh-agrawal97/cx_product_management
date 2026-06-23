@@ -3,30 +3,35 @@
 
 ---
 
-## Ticket Analysis — April & May 2026
+## Ticket Analysis — April 2026
+
+> **Call data source**: `cx_communication_messages` (message_type = CALL_DETAILS, meta_data JSON, dual-schema).
+> **OB only** — all call metrics below count outbound calls only. IB calls excluded from attempts, connected, and distribution.
+> **Closed** = `is_closed = 1 OR ever_merged_flag = 1`. Merged tickets are treated as closed.
+> **FCR** = ticket has exactly 1 OB connected call AND is closed (or merged).
+> **0/1/2/3/3+ Conn%** = % of tickets by OB connected call count. Closure% in brackets = % of that bucket that is closed.
+> See `CX_post_sales_AIR.md` for full methodology including dual-schema JSON handling.
 
 ### Query-Level Breakdown
 
-| Query | Tickets | App% | FCR% | 0 Calls% | 1 Call% | 2 Calls% | 3 Calls% | 3+ Calls% |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Warranty | 15,058 | 64.5 | 18.1 | 7.8 | 20.0 | 14.4 | 10.4 | **47.4** |
-| Payments - Seller | 7,310 | 68.6 | 30.9 | 9.6 | 35.3 | 29.8 | 11.1 | 14.0 |
-| RC | 5,858 | 72.8 | 29.7 | 14.9 | 31.6 | 15.9 | 9.4 | 28.2 |
-| RSA | 3,979 | 0.6 | 39.3 | 9.2 | 44.7 | 19.2 | 7.4 | 19.5 |
-| RC - Seller | 3,912 | 67.1 | 35.0 | 11.7 | 38.5 | 17.1 | 9.5 | 23.2 |
-| Insurance | 2,641 | 63.8 | 37.9 | 8.8 | 40.4 | 17.4 | 9.1 | 24.2 |
-| Spinny Benefits | 2,311 | 78.3 | 8.0 | 3.2 | 9.8 | 7.8 | 8.9 | **70.4** |
-| Seller-Miscellaneous | 2,288 | 52.9 | 36.0 | 11.8 | 39.6 | 18.9 | 10.1 | 19.7 |
-| Miscellaneous | 1,984 | 68.2 | 33.0 | 9.0 | 35.5 | 18.8 | 11.0 | 25.7 |
-| Payments | 1,691 | 64.7 | 46.4 | 18.0 | 49.0 | 12.2 | 7.6 | 13.2 |
-| Fastag | 1,381 | 77.0 | 33.4 | 5.8 | 35.7 | 17.2 | 13.3 | 28.0 |
-| Other | 1,088 | 0.5 | 28.3 | 20.2 | 32.5 | 21.3 | 11.5 | 14.4 |
-| HSRP | 852 | 71.6 | 12.6 | 3.6 | 16.3 | 16.0 | 12.2 | **51.9** |
-| Document | 748 | 87.6 | 32.2 | 10.2 | 35.0 | 21.4 | 13.2 | 20.2 |
-| Missed Call - Luxury | 145 | 0.0 | 2.1 | 3.4 | 62.8 | 25.5 | 4.1 | 4.1 |
-| Welcome call | 74 | 0.0 | 16.2 | 16.2 | 43.2 | 21.6 | 9.5 | 9.5 |
-| FASTag Recharge Transaction | 32 | 100.0 | 0.0 | 96.9 | 3.1 | 0.0 | 0.0 | 0.0 |
-| FASTag Recharge | 27 | 100.0 | 7.4 | 77.8 | 7.4 | 3.7 | 7.4 | 3.7 |
+| Query | Tickets | Closed% | App% | FCR% | OB Attempts (per tkt) | Avg OB to Close | OB Connected (per tkt) | Connect% | 0 Conn% (Closed%) | 1 Conn% (Closed%) | 2 Conn% (Closed%) | 3 Conn% (Closed%) | 3+ Conn% (Closed%) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|---|---|---|
+| **OVERALL** | **24,859** | **98.6** | **59.9** | **33.1** | **88,710 (3.6)** | **3.4** | **62,041 (2.5)** | **69.9** | **22.5% (99.9%)** | **33.2% (99.7%)** | **16.7% (99.6%)** | **8.4% (99.2%)** | **19.2% (94.0%)** |
+| | | | | | | | | | | | | | |
+| Warranty | 7,531 | 99.7 | 66.8 | 21.2 | 36,815 (4.9) | 4.8 | 27,078 (3.6) | 73.6 | 26.0% (100%) | 21.2% (100%) | 14.0% (100%) | 8.9% (100%) | 29.9% (99.1%) |
+| Payments - Seller | 3,502 | 99.8 | 64.6 | 35.2 | 8,680 (2.5) | 2.4 | 5,770 (1.6) | 66.5 | 20.0% (100%) | 35.2% (99.9%) | 28.6% (100%) | 8.7% (100%) | 7.5% (98.1%) |
+| RC | 2,818 | 95.6 | 73.5 | 36.7 | 10,108 (3.6) | 3.1 | 6,652 (2.4) | 65.8 | 20.0% (100%) | 36.7% (99.9%) | 14.3% (99.8%) | 8.1% (98.2%) | 20.9% (80.0%) |
+| RSA | 1,938 | 100.0 | 0.4 | 47.4 | 2,778 (1.4) | 1.4 | 1,727 (0.9) | 62.2 | 34.9% (100%) | 47.4% (100%) | 13.3% (100%) | 3.0% (100%) | 1.5% (100%) |
+| RC - Seller | 1,785 | 90.0 | 61.6 | 39.8 | 5,827 (3.3) | 2.6 | 3,701 (2.1) | 63.5 | 19.0% (97.6%) | 41.2% (96.5%) | 15.6% (94.3%) | 7.5% (91.0%) | 16.7% (61.1%) |
+| Insurance | 1,293 | 99.6 | 61.9 | 45.1 | 4,167 (3.2) | 3.1 | 2,979 (2.3) | 71.5 | 17.6% (100%) | 45.1% (100%) | 14.6% (100%) | 8.4% (100%) | 14.4% (97.3%) |
+| Spinny Benefits | 1,015 | 99.5 | 76.8 | 18.9 | 6,336 (6.2) | 6.1 | 4,655 (4.6) | 73.5 | 21.1% (100%) | 18.9% (100%) | 9.3% (100%) | 8.0% (100%) | 42.8% (98.8%) |
+| Seller-Misc | 1,040 | 99.5 | 52.4 | 42.0 | 3,014 (2.9) | 2.8 | 1,977 (1.9) | 65.6 | 15.5% (100%) | 42.0% (100%) | 18.2% (100%) | 10.1% (100%) | 14.2% (96.6%) |
+| Payments | 909 | 99.9 | 62.2 | 49.9 | 1,877 (2.1) | 2.0 | 1,276 (1.4) | 68.0 | 26.1% (100%) | 49.9% (100%) | 10.5% (100%) | 5.6% (100%) | 7.9% (98.6%) |
+| Miscellaneous | 865 | 99.4 | 66.5 | 39.5 | 2,425 (2.8) | 2.7 | 1,719 (2.0) | 70.9 | 16.9% (100%) | 39.5% (100%) | 19.2% (100%) | 10.5% (100%) | 13.9% (95.8%) |
+| Fastag | 695 | 99.7 | 75.0 | 41.6 | 2,123 (3.1) | 3.0 | 1,456 (2.1) | 68.6 | 14.0% (100%) | 41.6% (100%) | 15.3% (100%) | 12.5% (100%) | 16.7% (98.3%) |
+| Other | 592 | 100.0 | 0.5 | 26.2 | 1,726 (2.9) | 2.9 | 986 (1.7) | 57.1 | 29.2% (100%) | 26.2% (100%) | 21.6% (100%) | 11.8% (100%) | 11.1% (100%) |
+| HSRP | 400 | 99.5 | 71.5 | 16.8 | 1,757 (4.4) | 4.3 | 1,306 (3.3) | 74.3 | 8.5% (100%) | 16.8% (100%) | 21.3% (100%) | 15.3% (100%) | 38.3% (98.7%) |
+| Document | 360 | 100.0 | 84.7 | 37.5 | 898 (2.5) | 2.5 | 628 (1.7) | 69.9 | 16.9% (100%) | 37.5% (100%) | 24.4% (100%) | 10.8% (100%) | 10.3% (100%) |
 
 ---
 
@@ -34,34 +39,42 @@
 
 ### 🔴 High-Volume, Low-FCR — Biggest Pain Points
 
-| Category | Tickets | FCR% | 3+ Calls% |
-|---|---:|---:|---:|
-| **Warranty** | 15,058 | 18.1% | 47.4% |
-| **Spinny Benefits** | 2,311 | 8.0% | 70.4% |
-| **HSRP** | 852 | 12.6% | 51.9% |
+| Category | Tickets | FCR% | 3+ Conn% | OB Attempts/tkt | Avg OB to Close | OB Connect% |
+|---|---:|---:|---:|---:|---:|---:|
+| **Warranty** | 7,531 | 21.2% | 29.9% | 4.9 | 4.8 | 73.6% |
+| **Spinny Benefits** | 1,015 | 18.9% | 42.8% | 6.2 | 6.1 | 73.5% |
+| **HSRP** | 400 | 16.8% | 38.3% | 4.4 | 4.3 | 74.3% |
 
-- **Warranty** is ~29% of all tickets. <1 in 5 resolved on first contact, nearly half need 4+ touchpoints — likely a mix of claim complexity + agent knowledge gaps.
-- **Spinny Benefits** has the worst FCR in the dataset (8.0%) and worsening — 3+ calls jumped to 70.4%. Customers clearly don't understand what they've bought or can't self-serve. High app usage (78.3%) but still broken.
-- **HSRP** — high app %, low FCR. Process-dependent (govt systems) so FCR improvement needs product workarounds (status tracking, proactive nudges).
+- **Warranty** is ~30% of all tickets, consumes **37K OB attempts** in April alone (41% of all OB calls). Only 1 in 5 resolved on first connected call. 29.9% need 3+ OB connected calls. Takes 4.8 OB attempts on average to close a ticket.
+- **Spinny Benefits** has the worst FCR after HSRP (18.9%) and highest call intensity — 6.2 OB attempts, 6.1 needed to close. 42.8% need 3+ OB connected calls — nearly half the volume is chronic repeat-contact.
+- **HSRP** — high app%, lowest FCR (16.8%). 4.4 OB attempts per ticket, 38.3% need 3+ connected. Process-dependent (govt/RTO systems) so FCR improvement needs product workarounds (status tracking, proactive nudges).
 
 ### 🟡 High-Volume, Moderate FCR — Improvable
 
-| Category | Tickets | FCR% | 3+ Calls% |
-|---|---:|---:|---:|
-| Payments - Seller | 7,310 | 30.9% | 14.0% |
-| RC | 5,858 | 29.7% | 28.2% |
-| RC - Seller | 3,912 | 35.0% | 23.2% |
+| Category | Tickets | FCR% | 3+ Conn% | OB Attempts/tkt | Avg OB to Close | OB Connect% |
+|---|---:|---:|---:|---:|---:|---:|
+| Payments - Seller | 3,502 | 35.2% | 7.5% | 2.5 | 2.4 | 66.5% |
+| RC | 2,818 | 36.7% | 20.9% | 3.6 | 3.1 | 65.8% |
+| RC - Seller | 1,785 | 39.8% | 16.7% | 3.3 | 2.6 | 63.5% |
 
-- Decent FCR but room to push — RC categories have a notable 3+ calls tail.
+- RC has a long 3+ calls tail (20.9%) and only 80% of 3+ conn tickets are closed — 1 in 5 heavy-touch RC tickets still unresolved after 2+ months.
+- **RC - Seller** has the lowest overall closure at **90.0%** — 3+ conn bucket is only 61.1% closed. These are RTO/govt-dependent RC transfer tickets that stay open waiting for process completion.
+- **RSA** is an outlier: 100% closed, 47.4% FCR, but driven by inbound calls (1.4 OB/tkt vs 1.9 IB/tkt) — customers call in for roadside assistance, not the other way.
 
 ### 🟢 Healthier Categories
 
-- **Payments** (buyer): 46.4% FCR, only 13.2% 3+ calls
-- **RSA**: 39.3% FCR despite near-zero app usage (0.6%)
-- **Insurance**: 37.9% FCR
+- **Payments** (buyer): 49.9% FCR, only 7.9% 3+ connected, 2.1 OB attempts/tkt, 2.0 to close — cleanest category
+- **Insurance**: 45.1% FCR, 14.4% 3+ connected
+- **Seller-Misc**: 42.0% FCR, 99.5% closed
 
-### 📌 Cross-Cutting Insight
-**High app% ≠ self-serve deflection.** High `app_pct` doesn't correlate with high FCR — app tickets aren't being resolved, just channel-shifted.
+### 📌 Cross-Cutting Insights
+
+1. **98.6% of April tickets are closed** (including merged). Only 354 genuinely pending — mostly RC-Seller tickets stuck at RTO.
+2. **High app% ≠ self-serve deflection.** High `app_pct` doesn't correlate with high FCR — app tickets aren't being resolved, just channel-shifted.
+3. **Overall OB connect rate is 69.9%** — ~30% of all outbound call attempts are wasted. At 89K OB attempts in April, that's **~27K failed calls** burning agent time.
+4. **22.5% of tickets have zero OB connected calls** — mostly merged/chat-resolved tickets (99.9% closed). Of these, 22.7% never had an OB attempt at all (chat-only), and 3.3% had attempts but never connected.
+5. **RSA is inbound-heavy** — 34.9% have 0 OB connected calls, 47.4% have exactly 1. Customers proactively call in for roadside assistance — different support model needed.
+6. **3+ conn bucket closure drops sharply for RC (80%) and RC-Seller (61%)** — these are the genuinely stuck tickets, blocked on external processes (RTO, govt).
 
 ---
 
