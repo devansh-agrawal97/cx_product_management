@@ -528,6 +528,59 @@ The top 4 buckets — status checks, requests, document sharing, and issue repor
 
 ---
 
+## Missed Same-Slot Callbacks — Root Cause Analysis (Jun 22–23, 2026)
+
+### 1. Scope
+
+196 missed same-slot callbacks on Jun 22–23. 170 traceable in the agent timeline, 26 not found.
+
+### 2. Root Cause Split
+
+| Root Cause | Share |
+|---|---:|
+| Both queue depth + off-flow | 59% |
+| Pure queue depth | 27% |
+| Not in timeline | 13% |
+| Off-flow only | ~1% |
+| Neither | ~1% |
+
+### 3. Queue Depth
+
+- Average **9.8 queue tickets ahead** of the callback at time of request
+- Pure queue cases: median 8 tickets, max 21
+- Queue composition: 70% fresh tickets (newly prioritised after the CB was created), 24% morning batch (10:15–11:30 slots), 1% backlog (pre-EOD/overnight)
+- **Key implication:** Agents aren't stuck on old backlog — they're being continuously fed new work even while a callback is pending
+
+### 4. Off-Flow Activity
+
+- Average **6.7 off-flow breathers** per missed callback; among callbacks with any off-flow, avg jumps to **9.7**
+- 5 agents (812, 883, 1001, 934, 13) were working ≥60% off-flow in their windows — responsible for **28 misses**
+- Agent 812: 184 off-flow breathers in a single callback window
+- Agent 1001: highest volume — 13 misses, 14.5 avg off-flow per miss
+
+### 5. Late Login
+
+- **70% of missed callbacks** had agents logging in after 10:15 AM (first batch slot)
+- 10 callbacks: CB was created before the agent even logged in
+- Worst offenders: agent 979 (23 misses, login 10:29), agent 988 (9 misses, login 11:58), agents 260 and 429 (11 misses each, login ~10:29–10:39)
+- Late login compounds queue depth: agents walk in to a pre-loaded morning batch
+
+### 6. Agent Segmentation
+
+Two distinct profiles:
+- **Pure queue agents** (429, 275, 488, 796, 978): near-zero off-flow, miss due to high ticket volume
+- **Off-flow-heavy agents** (1001, 934, 832, 13): consistently bypass the flow
+
+### 7. Summary & Actionable Levers
+
+| Lever | Action |
+|---|---|
+| **(a) Queue prioritisation** | Prioritise callbacks above fresh tickets in the flow |
+| **(b) Off-flow compliance** | Address off-flow behaviour for identified agents (1001, 934, 832, 13, 883) |
+| **(c) Login compliance** | Enforce 10:00–10:15 login for agents handling morning batch slots |
+
+---
+
 ## Q3 Roadmap (TBD)
 
 > _To be built out — priorities, initiatives, owners, and timelines to follow._
