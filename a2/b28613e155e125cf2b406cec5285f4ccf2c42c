@@ -1,0 +1,31 @@
+cx_q3_roadmap.md
+  s_412e47625bb9c0::t_ce35100812078d 330-530
+  s_1e9ec7557c62fd::t_87cc0691008317 15-127
+CX_post_sales_AIR.md
+  s_412e47625bb9c0::t_5fc6db62fffbd2 919-949
+  s_412e47625bb9c0::t_1362db483a8a36 950-1150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "a2b28613e155e125cf2b406cec5285f4ccf2c42c",
+  "prompts": {},
+  "sessions": {
+    "s_1e9ec7557c62fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f73483b4-2264-443c-9682-e383abf64579",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "devansh-agrawal97 <devansh.agrawal@spinny.com>"
+    },
+    "s_412e47625bb9c0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9d73c7fb-0856-4e88-8d96-c74eec1b9538",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "devansh-agrawal97 <devansh.agrawal@spinny.com>"
+    }
+  }
+}
