@@ -916,6 +916,238 @@ Tickets are bucketed by their per-ticket OB connected call count. Within each bu
 - **FCR**: 33.1% (1 OB connected & closed)
 - **0 OB conn tickets**: 22.5% (99.9% closed — mostly chat-resolved or merged)
 - **3+ OB conn tickets**: 19.2% (94.0% closed — chronic repeat-contact)
+
+##### Query-level OB distribution with merge % (April 2026, all tickets incl. merged)
+
+Merged tickets concentrate heavily in the 0 OB connected bucket. The `(M%)` in each cell shows what
+share of that bucket is merged tickets — essential context when interpreting "0 OB connected" rates.
+
+| Query | Tickets | Closed % | FCR % | App % | OB Att | OB Conn | 0 (M%) | 1 (M%) | 2 (M%) | 3 (M%) | 3+ |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Warranty** | 7,464 | 99.7 | 25.6 | 66.8 | 36,067 | 26,537 | 1,947 (83%) | 1,586 (12%) | 1,051 (4%) | 664 (2%) | 2,216 |
+| **Payments-Seller** | 3,493 | 99.8 | 39.4 | 64.6 | 8,649 | 5,753 | 698 (55%) | 1,227 (5%) | 1,003 (0%) | 303 (0%) | 262 |
+| **RC** | 2,780 | 95.5 | 42.7 | 73.3 | 9,904 | 6,529 | 558 (30%) | 1,028 (8%) | 398 (2%) | 223 (0%) | 573 |
+| **RSA** | 1,924 | 100.0 | 61.8 | 0.4 | 2,754 | 1,710 | 675 (67%) | 908 (8%) | 255 (4%) | 57 (2%) | 29 |
+| **RC-Seller** | 1,783 | 90.1 | 51.9 | 61.6 | 5,821 | 3,696 | 339 (43%) | 735 (6%) | 279 (2%) | 133 (1%) | 297 |
+| **Insurance** | 1,274 | 99.6 | 49.1 | 61.9 | 4,007 | 2,873 | 225 (52%) | 579 (7%) | 186 (1%) | 105 (2%) | 179 |
+| **Seller-Misc** | 1,027 | 99.5 | 47.8 | 52.5 | 2,953 | 1,936 | 158 (37%) | 434 (4%) | 188 (1%) | 103 (0%) | 144 |
+| **Spinny Benefits** | 1,004 | 99.5 | 11.3 | 76.8 | 6,260 | 4,599 | 211 (92%) | 191 (53%) | 92 (16%) | 81 (5%) | 429 |
+| **Payments** | 900 | 99.8 | 65.4 | 62.1 | 1,842 | 1,253 | 237 (33%) | 454 (2%) | 91 (1%) | 48 (2%) | 70 |
+| **Miscellaneous** | 834 | 99.5 | 42.1 | 66.1 | 2,271 | 1,606 | 144 (50%) | 338 (5%) | 158 (2%) | 84 (1%) | 110 |
+| **Fastag** | 689 | 99.7 | 40.5 | 74.9 | 2,112 | 1,445 | 96 (44%) | 288 (5%) | 103 (2%) | 87 (0%) | 115 |
+| **Other** | 581 | 100.0 | 35.3 | 0.5 | 1,664 | 949 | 171 (34%) | 154 (6%) | 126 (1%) | 69 (0%) | 61 |
+| **HSRP** | 392 | 99.5 | 12.0 | 72.2 | 1,711 | 1,276 | 34 (53%) | 67 (19%) | 83 (4%) | 58 (0%) | 150 |
+| **Document** | 350 | 100.0 | 38.0 | 84.6 | 859 | 604 | 60 (38%) | 131 (2%) | 85 (0%) | 39 (0%) | 35 |
+
+**Key patterns:**
+- **Merged tickets are overwhelmingly in the 0-conn bucket** — Warranty 83%, Spinny Benefits 92%, RSA 67%. Most "0 OB connected" is not a service gap but ticket merges.
+- **Spinny Benefits has unusually high merge rates even in 1-conn (53%) and 2-conn (16%)** — suggests aggressive merging of duplicate benefit requests even after calls are made.
+- **Merge rates drop to <10% in the 1+ OB connected buckets** for most queries, confirming merged tickets rarely have outbound calls made before absorption.
+- **RSA is 99.6% non-app** (0.4% app) — almost all RSA tickets originate from calls/other channels, unlike most other queries (60–85% app).
+- **Highest FCR:** Payments (65.4%), RSA (61.8%) — simpler, single-call resolution queries.
+- **Lowest FCR:** Spinny Benefits (11.3%), HSRP (12.0%) — multi-touch, process-heavy queries requiring 3+ calls.
+- **Most call-heavy:** Spinny Benefits (avg 6.2 OB att/ticket), Warranty (avg 4.8 OB att/ticket).
+
+---
+
+##### 0 OB Connected Deep Dive — Why Tickets Close Without a Connected Call (April 2026)
+
+**Total 0-OB-connected tickets: 5,684** (2,250 non-merged + 3,434 merged). Analysis below covers
+non-merged tickets (the real closure patterns) and merged tickets (duplicate-creation patterns).
+
+###### All Queries — Non-Merged: 2,250 tickets across 11 patterns
+
+| # | Bucket | Tickets | % | Avg CX Msgs | Avg Agent Msgs | Avg AI Msgs | Avg Sys Msgs | Top Queries |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| 1 | **Customer Unreachable** (Unresponsive / Cx not connected / 3 call attempts exhausted) | 348 | 15.5 | 1.7 | 0.6 | 0.1 | 2.9 | RSA (120), Payments-Seller (41), Warranty (33), RC (32) |
+| 2 | **Paused → Auto-Close** | 302 | 13.4 | 2.1 | 0.8 | 0.2 | 7.2 | Warranty (65), RC (51), Other (47), Payments-Seller (42) |
+| 3 | **Payment Released** (OTP/PP/NOC/Fastag/RC Card hold) | 290 | 12.9 | 2.5 | 0.9 | 0.1 | 2.5 | Payments-Seller (201), Other (45), Payments (19) |
+| 4 | **RC Process** (RC Transferred / Dispatched / TAT Shared / couriered) | 282 | 12.5 | 2.1 | 1.2 | 0.2 | 2.6 | RC (142), RC-Seller (140) |
+| 5 | **Others** (uncategorized) | 249 | 11.1 | 2.1 | 1.1 | 0.1 | 2.0 | Payments (81), Misc (38), RC-Seller (25) |
+| 6 | **Bot Auto-Denial** (NULL closing reason, bot first-touch 981/998) | 187 | 8.3 | 2.5 | 0.0 | 3.6 | 0.0 | RC (119), Warranty (68) |
+| 7 | **Info Shared** (Explanation / TAT / Docs / Fastag / Insurance) | 172 | 7.6 | 1.9 | 0.8 | 0.1 | 1.9 | Payments (48), Insurance (48), Payments-Seller (39) |
+| 8 | **Resolved** (on call / on chat / Issue Resolved) | 139 | 6.2 | 2.5 | 1.3 | 0.3 | 2.4 | Warranty (58), Seller-Misc (46), RC (11) |
+| 9 | **Denial / Not Needed** (Out of Coverage / Cx did not require RSA / Policy Expired / Not eligible) | 102 | 4.5 | 1.7 | 0.5 | 0.1 | 1.7 | RSA (70), Warranty (24) |
+| 10 | **Scheduling Exhausted** (3 scheduling attempts) | 62 | 2.8 | 2.7 | 0.7 | 0.4 | 3.2 | Warranty (62 — 100%) |
+| 11 | **Repair Completed** (workshop / car delivered / car picked) | 15 | 0.7 | 3.3 | 1.0 | 0.0 | 8.1 | Warranty (15 — 100%) |
+
+**Sample ticket IDs per bucket:**
+
+| Bucket | Sample Tickets |
+|---|---|
+| Customer Unreachable | `2057912`, `2057936`, `2058007`, `2058436`, `2058668` |
+| Paused → Auto-Close | `2057669`, `2058050`, `2058368`, `2058413`, `2058557` |
+| Payment Released | `2057630`, `2057903`, `2057949`, `2058517`, `2058575` |
+| RC Process | `2057928`, `2057962`, `2057972`, `2058456`, `2058777` |
+| Others | `2058610`, `2058717`, `2058845`, `2059216`, `2059229` |
+| Bot Auto-Denial | `2058699`, `2058850`, `2060537`, `2061444`, `2069872` |
+| Info Shared | `2057675`, `2057782`, `2057840`, `2057994`, `2058049` |
+| Resolved | `2057893`, `2058507`, `2058841`, `2059221`, `2059397` |
+| Denial / Not Needed | `2058341`, `2059204`, `2059601`, `2059963`, `2061500` |
+| Scheduling Exhausted | `2057837`, `2061196`, `2065043`, `2065102`, `2065935` |
+| Repair Completed | `2059578`, `2066916`, `2067451`, `2069013`, `2069438` |
+
+**Pattern descriptions (confirmed by reading communications_metadata on sample tickets):**
+
+1. **Customer Unreachable:** Agent made 2-3 OB attempts, none connected. Internal notes: *"Unresponsive / RNR / No. switch off"*. System sends "We attempted to contact you" after each fail. Closed without resolution.
+2. **Paused → Auto-Close:** Same unreachability, but goes through the formal pause flow: ticket put on hold with a resume deadline → system sends reminder → customer doesn't resume → auto-closed. Avg 7.2 system messages from the pause chain.
+3. **Payment Released:** Agent processes hold-amount release as a **back-office action** (no call needed), then informs customer via chat with payment screenshot + UTR: *"Hold amount has been released. Kindly check."*
+4. **RC Process:** Agent shares RC transfer status, courier tracking ID, or TAT commitment via chat. No call required for status updates.
+5. **Bot Auto-Denial:** AI bot (981=RC Agent, 998=WarrantyAI) handles end-to-end. Bot reads concern, issues verdict, customer doesn't reply → auto-closes. **0 agent messages, 3.6 avg AI messages.** No human ever touches.
+6. **Info Shared:** Agent shares explanation, document, or TAT via chat — informational resolution. Templated responses.
+7. **Resolved:** "Resolved on call" tickets often used **personal/office phones** not tracked in CRM (agent notes: *"call done by social media office phone"*). "Resolved on chat" = fully resolved via messaging.
+8. **Denial / Not Needed:** Warranty expired, out of coverage, or customer didn't actually need the service (RSA: *"Cx did not require RSA"*).
+9. **Scheduling Exhausted:** Warranty-only. Agent tried to schedule inspection/workshop visit 3 times, customer didn't respond to scheduling requests.
+10. **Repair Completed:** Workshop flow completed via system messages (inspection → repair → delivery). Process-driven, no OB call needed.
+
+**All-query automation map:**
+
+| Bucket | Tickets/mo | Already Automated? | Automation Potential | Key Lever |
+|---|---:|---|---|---|
+| Customer Unreachable | 348 | ❌ | 🟡 Medium | Deflect to WhatsApp/chat after 1st failed OB |
+| Paused → Auto-Close | 302 | ⚠️ Partial | 🟢 Low | Closure is auto; reduce cycle time |
+| Payment Released | 290 | ❌ | 🔴 **Very High** | Auto-verify RC → auto-release → auto-notify with UTR |
+| RC Process | 282 | ❌ | 🔴 **Very High** | Auto-share RC status / courier tracking via bot |
+| Others | 249 | ❌ | ⚪ Unknown | Need better reason tagging |
+| Bot Auto-Denial | 187 | ✅ Yes | 🟢 Done | Already E2E bot-handled; expand to more queries |
+| Info Shared | 172 | ❌ | 🔴 **High** | Bot auto-reply with templated info |
+| Resolved | 139 | ❌ | 🟡 Low | CRM call tracking fix for off-system calls |
+| Denial / Not Needed | 102 | ❌ | 🔴 **High** | Eligibility check at ticket creation |
+| Scheduling Exhausted | 62 | ❌ | 🔴 **High** | Self-serve scheduling via app/WhatsApp |
+| Repair Completed | 15 | ✅ Yes | 🟢 Done | System messages handle this |
+
+**~1,200 tickets/month (53%) across Payment Released, RC Process, Bot Auto-Denial, Info Shared, Denial, and Scheduling Exhausted are automatable.**
+
+---
+
+###### Payments-Seller Deep Dive — 0 OB Connected (April 2026)
+
+**Total: 735 tickets** (353 non-merged + 382 merged)
+
+**Non-merged: 353 tickets — 6 closure patterns:**
+
+| # | Bucket | Tickets | % of 353 | Closing Reasons | Avg CX Msgs | Avg Agent | Avg Sys |
+|---|---|---:|---:|---|---:|---:|---:|
+| 1 | **Payment Released** | 201 | 56.9 | OTP Amount Released (118), PP Amount Released (60), Bank NOC Hold (15), Fastag Hold (4), RC Card (3), Other Hold (1) | 2.9 | 1.0 | 2.7 |
+| 2 | **Paused → Auto-Close** | 42 | 11.9 | Paused Ticket Automatic Closure | 2.9 | 1.1 | 7.3 |
+| 3 | **Customer Unreachable** | 41 | 11.6 | Unresponsive (40), Cx not connected (1) | 2.1 | 0.7 | 3.7 |
+| 4 | **Info/TAT Shared** | 40 | 11.3 | TAT Shared (39), Deduction Informed (1) | 2.4 | 1.1 | 2.3 |
+| 5 | **Others** | 21 | 5.9 | Others | 3.0 | 1.2 | 2.0 |
+| 6 | **Denial** | 8 | 2.3 | Not eligible | 2.1 | 0.8 | 1.5 |
+
+**Sample ticket IDs per bucket:**
+
+| Bucket | Sample Tickets |
+|---|---|
+| Payment Released | `2057630`, `2057949`, `2058575`, `2058655`, `2058683` |
+| Paused → Auto-Close | `2058557`, `2060871`, `2061804`, `2082176`, `2087481` |
+| Customer Unreachable | `2058886`, `2059508`, `2061811`, `2063313`, `2064691` |
+| Info/TAT Shared | `2059543`, `2059577`, `2060464`, `2061596`, `2062392` |
+| Others | `2067025`, `2067548`, `2079143`, `2087851`, `2088985` |
+| Denial | `2059963`, `2067529`, `2079583`, `2099232`, `2108573` |
+
+**Merged: 382 tickets — duplicate creation patterns:**
+
+382 merged into 306 unique parents (avg 1.2 children/parent). **94% same customer** — genuine
+duplicates. Root cause: seller re-raises because they don't see progress on their existing ticket.
+
+**Time gap from parent creation to merged child:**
+
+| Gap | Tickets | % | App | Web | VOC | Manual |
+|---|---:|---:|---:|---:|---:|---:|
+| < 5 min | 137 | 35.9 | 85 | 13 | 34 | 5 |
+| 5–60 min | 74 | 19.4 | 24 | 40 | 9 | 1 |
+| 1–24 hrs | 81 | 21.2 | 39 | 24 | 12 | 6 |
+| > 24 hrs | 90 | 23.6 | 46 | 15 | 25 | 4 |
+
+**Sample merged tickets by time gap:**
+
+| Gap | Merged Ticket | Parent Ticket | Source | Gap (min) |
+|---|---|---|---|---:|
+| < 5 min | `2057930` | `2057923` | App | 3 |
+| < 5 min | `2058156` | `2058155` | VOC | 0 |
+| < 5 min | `2058521` | `2058519` | App | 0 |
+| < 5 min | `2058706` | `2058720` | Web | -3 |
+| < 5 min | `2059167` | `2059180` | App | -3 |
+| 5–60 min | `2058266` | `2058044` | App | 10 |
+| 5–60 min | `2061449` | `2061374` | App | 16 |
+| 5–60 min | `2061803` | `2061770` | Web | 10 |
+| 5–60 min | `2061890` | `2061869` | Web | 6 |
+| 5–60 min | `2063341` | `2063335` | App | 21 |
+| 1–24 hrs | `2058038` | `2055474` | VOC | 1392 |
+| 1–24 hrs | `2058280` | `2055474` | App | 1410 |
+| 1–24 hrs | `2059547` | `2057928` | Manual | 435 |
+| 1–24 hrs | `2062094` | `2060916` | Web | 291 |
+| 1–24 hrs | `2063561` | `2063246` | Web | 753 |
+| > 24 hrs | `2060945` | `2055474` | App | 2829 |
+| > 24 hrs | `2062156` | `2044719` | App | 8501 |
+| > 24 hrs | `2063617` | `2059315` | VOC | 2580 |
+| > 24 hrs | `2063887` | `2060822` | App | 1540 |
+| > 24 hrs | `2064174` | `2057815` | VOC | 3101 |
+
+**Recategorization on merged tickets:** 35/382 (9.2%) were recategorized before merge — 21 by AI
+(Circuit), 14 by human agents. Most common flows: Payments-Seller sub-query refinement (*"My issue
+is not listed here"* → *"Refund of hold amount"*), and cross-query misroutes (RC-Seller → Payments-Seller,
+Seller-Misc → Payments-Seller). This is wasted effort — the ticket is about to be merged.
+
+**Payments-Seller automation map (combined non-merged + merged):**
+
+| # | Bucket | Tickets | % of 735 | Automation Potential | Key Lever |
+|---|---|---:|---:|---|---|
+| 1 | Payment Released | 201 | 27.3 | 🔴 **Very High** | Auto-check RC status → auto-release → auto-notify with UTR |
+| 2 | Merged < 5 min | 137 | 18.6 | 🔴 **Very High** | App-level duplicate prevention — block if open ticket exists for same sell_lead |
+| 3 | Merged > 24 hrs | 90 | 12.2 | 🔴 **High** | Proactive milestone notifications so seller doesn't re-raise |
+| 4 | Merged 1–24 hrs | 81 | 11.0 | 🟡 Medium | Auto-status update: *"We're working on it, ETA: X days"* |
+| 5 | Merged 5–60 min | 74 | 10.1 | 🔴 **Very High** | Same as #2 — app/web should prevent |
+| 6 | Paused → Auto-Close | 42 | 5.7 | 🟢 Partial | Closure is auto; reduce pause-to-close cycle |
+| 7 | Customer Unreachable | 41 | 5.6 | 🟡 Medium | Deflect to WhatsApp/chat after 1st failed OB |
+| 8 | Info/TAT Shared | 40 | 5.4 | 🔴 **High** | Bot auto-reply with TAT based on agreement date + process stage |
+| 9 | Others | 21 | 2.9 | ⚪ Unknown | Better reason tagging needed |
+| 10 | Denial | 8 | 1.1 | 🟡 Medium | Eligibility check at ticket creation |
+
+**~570 of 735 tickets (78%) are automatable:** 201 payment releases (auto-verify + auto-release +
+auto-notify), 292 merged duplicates (app duplicate prevention + proactive status updates), 40 TAT/info
+shares (bot auto-reply), ~40 from Paused/Unreachable (channel deflection to chat/WhatsApp).
+
+---
+
+###### Warranty Deep Dive — 0 OB Connected, Non-Merged (April 2026)
+
+**Total 0-OB-connected warranty tickets: 1,947** (331 non-merged + 1,616 merged (83%))
+
+**Non-merged: 331 tickets — 6 closure patterns:**
+
+| # | Bucket | Tickets | % of 331 | What Happens |
+|---|---|---:|---:|---|
+| 1 | **WarrantyAI Bot auto-denial** | 68 | 20.5 | Bot 998 handles E2E. Issues verdict, customer doesn't reply → auto-closes. 0 agent msgs, 3.4 avg AI msgs. |
+| 2 | **Paused → Auto-Close** | 65 | 19.6 | Agent attempts OB, can't connect → ticket paused → auto-closed. Avg 7.8 sys msgs. |
+| 3 | **Scheduling Exhausted** | 62 | 18.7 | 3 failed scheduling attempts for inspection/workshop visit → auto-closed. |
+| 4 | **Resolved on call** | 47 | 14.2 | Resolved via personal/office phones (not tracked in CRM) or IB calls. Misleading "0 OB connected". |
+| 5 | **3 call attempts exhausted** | 33 | 10.0 | 3 OB attempts, none connected → closed. Avg 5.6 sys msgs. |
+| 6 | **Operational closures** | 56 | 16.9 | Out of Coverage (16), Resolved on chat (11), Car repaired & delivered/picked (13), Policy Expired (7), Reimbursement Done (5), Workshop completed (2), others (2). |
+
+**Sample tickets per bucket:**
+
+| Bucket | Sample Tickets |
+|---|---|
+| WarrantyAI Bot auto-denial | `2119943`, `2119944`, `2120055` (+ any from `first_agent_assigned_id = 998` with NULL closing reason) |
+| Paused → Auto-Close | `2057669`, `2058413`, `2058591`, `2059244`, `2060589` |
+| Scheduling Exhausted | `2057837`, `2061196`, `2065043`, `2065102`, `2065935` |
+| Resolved on call | `2059221`, `2063892`, `2067674`, `2069252`, `2069824` |
+| 3 call attempts exhausted | `2059170`, `2062160`, `2062222`, `2066528`, `2066910` |
+| Operational closures | `2059578` (Car repaired), `2061566` (Out of Coverage), `2063991` (Resolved on chat), `2067449` (Resolved on chat), `2074351` (Out of Coverage) |
+
+**Warranty automation map:**
+
+| Bucket | Tickets/mo | Already Automated? | Automation Potential |
+|---|---:|---|---|
+| WarrantyAI Bot auto-denial | 68 | ✅ Yes | Already E2E bot-handled |
+| Paused → Auto-Close | 65 | ⚠️ Partial | 🟡 Closure is auto; scale it |
+| Scheduling Exhausted | 62 | ❌ | 🔴 **High** — self-serve scheduling via app/WhatsApp |
+| Resolved on call (off-CRM) | 47 | ❌ | 🟡 Low — CRM call tracking fix, not automation |
+| 3 call attempts exhausted | 33 | ⚠️ Partial | 🟡 Medium — deflect to chat/WhatsApp after 1st fail |
+| Operational closures | 56 | Mixed | 🟡 Medium — denial/expiry checks can be bot-driven |
+
 | `AOH_creation` | text | After office hours flag at creation |
 | `car_category` | text | Car category |
 | `city` | text | City |
